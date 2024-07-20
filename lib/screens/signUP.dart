@@ -161,6 +161,8 @@ class _SignupState extends State<Signup> {
                         email: uemail.text,
                         password: upass.text
                     );
+                    Navigator.pushReplacement(
+                        context, MaterialPageRoute(builder: (context) => Login()));
                   },
 
                   child: Text(

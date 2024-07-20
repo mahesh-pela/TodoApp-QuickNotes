@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:to_do_app/model/todo.dart';
 import 'package:to_do_app/screens/TodoScreen.dart';
 import 'package:to_do_app/screens/addTaskDialog.dart';
+import 'package:to_do_app/screens/login.dart';
 import '../constants/colors.dart';
 import '../widgets/todo_item.dart';
 
@@ -17,6 +19,7 @@ class _HomeState extends State<Home> {
   final todosList = Todo.todoList();
   final todoController = TextEditingController();
   List<Todo> foundToDo = [];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -101,6 +104,7 @@ class _HomeState extends State<Home> {
     return AppBar(
       elevation: 0,
       backgroundColor: tdBGColor,
+      automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -110,24 +114,21 @@ class _HomeState extends State<Home> {
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
-              if (value == 'settings') {
-                // Handle settings action
-              } else if (value == 'logout') {
-
+              if (value == 'logout') {
+                showDialog(
+                    context: context,
+                    builder: (context){
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                );
+                _auth.signOut();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
               }
             },
             itemBuilder: (BuildContext context) {
               return [
-                PopupMenuItem<String>(
-                  value: 'settings',
-                  child: Row(
-                    children: [
-                      Icon(Icons.settings),
-                      SizedBox(width: 10),
-                      Text('Settings'),
-                    ],
-                  ),
-                ),
                 PopupMenuItem<String>(
                   value: 'logout',
                   child: Row(
@@ -144,6 +145,12 @@ class _HomeState extends State<Home> {
               backgroundImage: AssetImage('assets/images/mahesh.jpg'),
               radius: 18,
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(13)
+            ),
+            color: Colors.white,
+            elevation: 4,
+            offset: Offset(0,50),
           ),
         ],
       ),

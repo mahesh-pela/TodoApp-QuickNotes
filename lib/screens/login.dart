@@ -1,3 +1,6 @@
+// import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:to_do_app/constants/colors.dart';
@@ -16,20 +19,27 @@ class _LoginState extends State<Login> {
   var uemail = TextEditingController();
   var upass = TextEditingController();
   var _obscureText = true;
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void handleLogin() {
-    String userEmail = uemail.text.toString();
-    String userPass = upass.text;
 
-    // print('Email: $userEmail and Password: $userPass');
-    if (userEmail == 'abc@gmail.com' && userPass == 'mahesh') {
-      //Navigating to another screen
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Home()));
-    } else {
-      //Show an error message
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Invalid email or password')));
+  void _signIn() async{
+    try{
+      // shows the circular progress when log in
+      showDialog(
+          context: context,
+          builder: (context){
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+      );
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: uemail.text,
+          password: upass.text
+      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>Home()));
+    }catch(e){
+      print('An unexpected error occurred. Please try again later.');
     }
   }
 
@@ -45,9 +55,8 @@ class _LoginState extends State<Login> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(
-                height: 110,
+                height: 150,
               ),
-
               RichText(
                 text: TextSpan(
                     style: TextStyle(
@@ -161,7 +170,7 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.only(right: 30),
                 child: ElevatedButton(
                   onPressed: () {
-                    handleLogin();
+                    _signIn();
                   },
                   child: Text(
                     'Sign In',
