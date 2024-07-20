@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352058833058",
+    "project_id": "quicknotes-bc80d",
+    "storage_bucket": "quicknotes-bc80d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352058833058:android:8fb9fcdc8f62bb50c6bffb",
+        "android_client_info": {
+          "package_name": "com.example.to_do_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQjujTsgvRIr9hTqVSoVwpvm2RinPbBi4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:to_do_app/model/todo.dart';
+import 'package:to_do_app/screens/TodoScreen.dart';
 import 'package:to_do_app/screens/addTaskDialog.dart';
 import '../constants/colors.dart';
 import '../widgets/todo_item.dart';
@@ -38,7 +39,7 @@ class _HomeState extends State<Home> {
           showDialog(
             context: context,
             builder: (context) {
-              return Addtaskdialog(
+              return Todoscreen(
                 onToDoAdded: (title, description) {
                   addToDoItem(title, description);
                   Navigator.of(context).pop();

@@ -1,32 +1,49 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:to_do_app/screens/home.dart';
 
 class Todoscreen extends StatefulWidget {
+  final Function(String, String) onToDoAdded;
+
+  const Todoscreen({Key? key, required this.onToDoAdded}) : super(key: key);
+
   @override
   State<Todoscreen> createState() => _TodoscreenState();
 }
 
 class _TodoscreenState extends State<Todoscreen> {
-  var current_date_time = DateTime.now();
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+
+  var currentDateTime = DateTime.now();
   OverlayEntry? _popupMenuOverlay;
 
   void _onMenuItemSelected(String value) {
     switch (value) {
       case 'save':
-      // Handle save action
+        String title = titleController.text.trim();
+        String description = descriptionController.text.trim();
+        if (title.isNotEmpty) {
+          widget.onToDoAdded(title, description);
+          Navigator.pop(context); // Close Todoscreen
+        }
         break;
       case 'reminder':
       // Handle reminder action
+        break;
+      case 'cancel':
+        Navigator.pop(context); // Close Todoscreen
         break;
       case 'delete':
       // Handle delete action
         break;
     }
-    _popupMenuOverlay?.remove();
+    _popupMenuOverlay?.remove(); // Remove overlay after handling action
+    FocusScope.of(context).requestFocus(FocusNode()); // Remove focus from text fields
   }
 
   void _showPopupMenu(BuildContext context) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
 
     _popupMenuOverlay = OverlayEntry(
       builder: (context) => Stack(
@@ -36,7 +53,6 @@ class _TodoscreenState extends State<Todoscreen> {
             onTap: () {
               _popupMenuOverlay?.remove();
             },
-            //dim main screen
             child: Container(
               color: Colors.black54,
             ),
@@ -65,24 +81,43 @@ class _TodoscreenState extends State<Todoscreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: () => _onMenuItemSelected('reminder'),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Reminder', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),),
-                      ),
-                    ),
-                    GestureDetector(
                       onTap: () => _onMenuItemSelected('save'),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),),
+                        child: Text(
+                          'Save',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _onMenuItemSelected('reminder'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Reminder',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _onMenuItemSelected('cancel'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                        ),
                       ),
                     ),
                     GestureDetector(
                       onTap: () => _onMenuItemSelected('delete'),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Delete', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),),
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                        ),
                       ),
                     ),
                   ],
@@ -94,7 +129,7 @@ class _TodoscreenState extends State<Todoscreen> {
       ),
     );
 
-    Overlay.of(context).insert(_popupMenuOverlay!);
+    Overlay.of(context)!.insert(_popupMenuOverlay!);
   }
 
   @override
@@ -115,13 +150,14 @@ class _TodoscreenState extends State<Todoscreen> {
           children: [
             // Title
             TextField(
+              controller: titleController,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: 20),
+                contentPadding: EdgeInsets.only(left: 20, bottom: 10),
                 hintText: 'Title',
                 hintStyle: TextStyle(
-                  color: Colors.grey,
+                  color: Colors.black26,
                   fontSize: 24,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
                 border: InputBorder.none,
               ),
@@ -129,16 +165,30 @@ class _TodoscreenState extends State<Todoscreen> {
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
               ),
+              // wraps text to next line when text reaches to the end screen
+              minLines: 1,
+              maxLines: null,
             ),
             Align(
               alignment: AlignmentDirectional.topStart,
               child: Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Text(
-                  '${current_date_time.day}/${current_date_time.month}/${current_date_time.year} ${current_date_time.hour}:${current_date_time.minute}',
+                  '${currentDateTime.day}/${currentDateTime.month}/${currentDateTime.year} ${currentDateTime.hour}:${currentDateTime.minute}',
+                  style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
+            TextField(
+              controller: descriptionController,
+              decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  hintText: 'Start typing',
+                  hintStyle: TextStyle(fontSize: 18, color: Colors.black26),
+                  border: InputBorder.none),
+              minLines: 1,
+              maxLines: null,
+            )
           ],
         ),
       ),

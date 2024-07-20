@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:to_do_app/constants/colors.dart';
 import 'package:to_do_app/model/todo.dart';
 import 'package:to_do_app/screens/TodoScreen.dart';
+import 'package:to_do_app/screens/addTaskDialog.dart';
 
 class TodoItem extends StatelessWidget {
   final Todo todo;
@@ -23,12 +24,12 @@ class TodoItem extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 20),
       child: ListTile(
-        // onTap: () {
-        //   onToDoChange(todo);
-        // },
-        onTap: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context) => Todoscreen()));
+        onTap: () {
+          onToDoChange(todo);
         },
+        // onTap: (){
+        //   // Navigator.push(context, MaterialPageRoute(builder: (context) => Todoscreen()));
+        // },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -94,4 +95,9 @@ class TodoItem extends StatelessWidget {
       ),
     );
   }
+
 }
+
+
+
+

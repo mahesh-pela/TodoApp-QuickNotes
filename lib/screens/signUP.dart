@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:to_do_app/screens/login.dart';
@@ -154,8 +155,14 @@ class _SignupState extends State<Signup> {
                 padding: EdgeInsets.only(right: 30),
                 child: ElevatedButton(
                   onPressed: () {
-
+                    //sign up logic
+                    final auth = FirebaseAuth.instance;
+                    auth.createUserWithEmailAndPassword(
+                        email: uemail.text,
+                        password: upass.text
+                    );
                   },
+
                   child: Text(
                     'Sign Up',
                     style: TextStyle(
@@ -241,3 +248,4 @@ class _SignupState extends State<Signup> {
     );
   }
 }
+
