@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:to_do_app/model/todo.dart';
 import 'package:to_do_app/screens/TodoScreen.dart';
 import 'package:to_do_app/screens/addTaskDialog.dart';
@@ -27,8 +28,20 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  void _onLogout(BuildContext context){
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logged Out')));
+  Future<void> signOutFromGoogle() async {
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
+    try {
+      // Sign out from Firebase
+      await _auth.signOut();
+
+      // Sign out from GoogleSign-In and disconnect
+      await _googleSignIn.signOut();
+      await _googleSignIn.disconnect();
+
+      // Now navigate to your login screen or handle the logout state
+    } catch (e) {
+      print('Error signing out: $e');
+    }
   }
 
   @override
@@ -115,20 +128,24 @@ class _HomeState extends State<Home> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
-                showDialog(
-                    context: context,
-                    builder: (context){
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                );
-                _auth.signOut();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
+                // showDialog(
+                //     context: context,
+                //     builder: (context){
+                //       return const Center(
+                //         child: CircularProgressIndicator(),
+                //       );
+                //     }
+                // );
+                signOutFromGoogle();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>Login()));
               }
             },
             itemBuilder: (BuildContext context) {
               return [
+                PopupMenuItem<String>(
+                  value: 'email',
+                  child: Text('${FirebaseAuth.instance.currentUser?.email??'Unknown'}'),
+                ),
                 PopupMenuItem<String>(
                   value: 'logout',
                   child: Row(

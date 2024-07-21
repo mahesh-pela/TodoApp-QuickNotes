@@ -1,10 +1,7 @@
-// import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:to_do_app/constants/colors.dart';
-import 'package:to_do_app/constants/textStyleTheme.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:to_do_app/screens/home.dart';
 import 'package:to_do_app/screens/signUP.dart';
 
@@ -21,27 +18,57 @@ class _LoginState extends State<Login> {
   var _obscureText = true;
   FirebaseAuth _auth = FirebaseAuth.instance;
 
-
-  void _signIn() async{
-    try{
-      // shows the circular progress when log in
+  // sign in using email and password
+  void _signIn() async {
+    try {
+      // Show the circular progress indicator while logging in
       showDialog(
-          context: context,
-          builder: (context){
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       );
+
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: uemail.text,
-          password: upass.text
+        email: uemail.text,
+        password: upass.text,
       );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>Home()));
-    }catch(e){
+
+      Navigator.pop(context); // Close the progress dialog
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+    } catch (e) {
+      Navigator.pop(context); // Close the progress dialog
       print('An unexpected error occurred. Please try again later.');
     }
   }
+
+  Future<UserCredential> signInWithGoogle() async {
+    showDialog(
+        context: context,
+        builder: (context){
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+    );
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,32 +81,31 @@ class _LoginState extends State<Login> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                height: 150,
-              ),
+              const SizedBox(height: 150),
               RichText(
                 text: TextSpan(
-                    style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black
-                    ),
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: 'Welcome ',
-                        style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.red),
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: 'Welcome ',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
                       ),
-                      TextSpan(text: 'back 👋')
-                    ]),
+                    ),
+                    TextSpan(text: 'back 👋'),
+                  ],
+                ),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 20),
                 child: Text('Enter your email',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               Container(
                 margin: EdgeInsets.only(top: 10),
@@ -95,76 +121,70 @@ class _LoginState extends State<Login> {
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
                         color: Colors.grey.shade300,
-                        // Lighter color for less visibility
-                        width: 1.0, // Thinner border for less visibility
+                        width: 1.0,
                       ),
                     ),
                   ),
                 ),
               ),
-
-              SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text('Enter your password',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               Container(
                 padding: EdgeInsets.only(right: 30),
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20)),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: TextField(
                   obscureText: _obscureText,
                   controller: upass,
                   decoration: InputDecoration(
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 10, top: 15, bottom: 15, right: 10),
-                        child: ImageIcon(
-                          AssetImage('assets/images/passlock.png'),
-                          size: 5,
-                        ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 10, top: 15, bottom: 15, right: 10),
+                      child: ImageIcon(
+                        AssetImage('assets/images/passlock.png'),
+                        size: 5,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                      hintText: 'Enter your password',
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                        onPressed: () {
-                          setState(() {
-                            _obscureText = !_obscureText;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20))),
-                ),
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: Text(
-                    'Having Issues? Reset Password now',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0000EE),
-                        decoration: TextDecoration.underline),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                    hintText: 'Enter your password',
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureText
+                          ? Icons.visibility_off
+                          : Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20)),
                   ),
                 ),
               ),
-              SizedBox(
-                height: 10,
+              SizedBox(height: 5),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 30),
+                  child: Text(
+                    'Forget Password?',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0000EE),
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
               ),
+              SizedBox(height: 10),
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.only(right: 30),
@@ -183,9 +203,7 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(10))),
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -206,9 +224,7 @@ class _LoginState extends State<Login> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: 20),
               Center(
                 child: Text(
                   'Or Sign In With',
@@ -218,9 +234,7 @@ class _LoginState extends State<Login> {
                       fontWeight: FontWeight.w500),
                 ),
               ),
-              SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -228,28 +242,34 @@ class _LoginState extends State<Login> {
                     width: 150,
                     height: 55,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: Colors.grey.shade200, width: 1.5)),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.grey.shade200, width: 1.5),
+                    ),
                     child: IconButton(
                       icon: Image.asset('assets/images/google logo.png'),
-                      onPressed: () {},
+                      onPressed: () async {
+                        await signInWithGoogle();
+                        Navigator.pushReplacement(
+                            context, MaterialPageRoute(builder: (context) => Home()));
+                      },
                     ),
                   ),
                   Container(
                     width: 150,
                     height: 55,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: Colors.grey.shade200, width: 1.5)),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.grey.shade200, width: 1.5),
+                    ),
                     child: IconButton(
                       icon: Image.asset('assets/images/facebook logo.png'),
                       onPressed: () {},
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

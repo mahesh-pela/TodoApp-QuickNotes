@@ -1,6 +1,9 @@
+
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:to_do_app/screens/home.dart';
 
 class Todoscreen extends StatefulWidget {
   final Function(String, String) onToDoAdded;
@@ -18,15 +21,29 @@ class _TodoscreenState extends State<Todoscreen> {
   var currentDateTime = DateTime.now();
   OverlayEntry? _popupMenuOverlay;
 
+  //adding data to the firebase
+  void addData(String title, String description, String datetime) async{
+    if(title.isNotEmpty){
+      FirebaseFirestore.instance.collection("Users").doc(title).set({
+        "Title" : title,
+        "Description" : description,
+        "DateTime" : datetime
+      }).then((value){
+          print('Data Inserted');
+      });
+    }
+  }
+
   void _onMenuItemSelected(String value) {
     switch (value) {
       case 'save':
-        String title = titleController.text.trim();
-        String description = descriptionController.text.trim();
-        if (title.isNotEmpty) {
-          widget.onToDoAdded(title, description);
-          Navigator.pop(context); // Close Todoscreen
-        }
+        String usrtitle = titleController.text.trim();
+        String usrdescription = descriptionController.text.trim();
+        String formattedDateTime = '${currentDateTime.day}/${currentDateTime.month}/${currentDateTime.year} ${currentDateTime.hour}:${currentDateTime.minute}';
+
+        addData(usrtitle, usrdescription, formattedDateTime);
+
+        Navigator.pop(context);
         break;
       case 'reminder':
       // Handle reminder action
@@ -165,7 +182,6 @@ class _TodoscreenState extends State<Todoscreen> {
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
               ),
-              // wraps text to next line when text reaches to the end screen
               minLines: 1,
               maxLines: null,
             ),
