@@ -19,16 +19,7 @@ class _HomeState extends State<Home> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future<void> signOutFromGoogle() async {
-    try {
-      await _auth.signOut();
-      await _googleSignIn.signOut();
-      await _googleSignIn.disconnect();
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
-    } catch (e) {
-      print('Error signing out: $e');
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +63,7 @@ class _HomeState extends State<Home> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
-                signOutFromGoogle();
+                // signOutFromGoogle();
               }
             },
             itemBuilder: (BuildContext context) {

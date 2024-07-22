@@ -16,13 +16,13 @@ class _DashboardState extends State<Dashboard> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   //google signout
-  Future<void> signOutFromGoogle() async{
-    try{
+  Future<void> signOutFromGoogle() async {
+    try {
       await _auth.signOut();
       await _googleSignIn.signOut();
       await _googleSignIn.disconnect();
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> Login()));
-    }catch(e){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
+    } catch (e) {
       print('Error signing out: $e');
     }
   }
@@ -170,6 +170,7 @@ class _DashboardState extends State<Dashboard> {
             onSelected: (value) {
               if (value == 'logout') {
                 signOutFromGoogle();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Login()));
               }
             },
             itemBuilder: (BuildContext context) {
