@@ -6,9 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Todoscreen extends StatefulWidget {
-  final Function(String, String) onToDoAdded;
+  // final Function(String, String) onToDoAdded;
 
-  const Todoscreen({Key? key, required this.onToDoAdded}) : super(key: key);
+  const Todoscreen({Key? key}) : super(key: key);
 
   @override
   State<Todoscreen> createState() => _TodoscreenState();

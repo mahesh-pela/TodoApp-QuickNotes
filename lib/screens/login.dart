@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:to_do_app/screens/dashBoard.dart';
 import 'package:to_do_app/screens/home.dart';
 import 'package:to_do_app/screens/signUP.dart';
 
@@ -37,22 +38,14 @@ class _LoginState extends State<Login> {
       );
 
       Navigator.pop(context); // Close the progress dialog
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard()));
     } catch (e) {
       Navigator.pop(context); // Close the progress dialog
-      print('An unexpected error occurred. Please try again later.');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login Error')));
     }
   }
 
   Future<UserCredential> signInWithGoogle() async {
-    showDialog(
-        context: context,
-        builder: (context){
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-    );
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -251,7 +244,7 @@ class _LoginState extends State<Login> {
                       onPressed: () async {
                         await signInWithGoogle();
                         Navigator.pushReplacement(
-                            context, MaterialPageRoute(builder: (context) => Home()));
+                            context, MaterialPageRoute(builder: (context) => Dashboard()));
                       },
                     ),
                   ),

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:to_do_app/screens/login.dart';
 
 class Splashscreen extends StatefulWidget{
   @override
@@ -9,10 +12,20 @@ class Splashscreen extends StatefulWidget{
 
 class _SplashscreenState extends State<Splashscreen>{
   @override
+  void initState(){
+    super.initState();
+
+    Timer(Duration(seconds: 2), (){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
+    });
+
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        child: Image(image: AssetImage('assets/Images/'),),
+        color: Colors.white,
+        child: Center(child: Image(image: AssetImage('assets/images/quicknotes-high-resolution-logo-transparent.png'),width: 300,)),
       ),
     );
   }

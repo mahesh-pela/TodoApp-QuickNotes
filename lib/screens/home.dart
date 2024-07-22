@@ -1,10 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:to_do_app/model/todo.dart';
 import 'package:to_do_app/screens/TodoScreen.dart';
-import 'package:to_do_app/screens/addTaskDialog.dart';
 import 'package:to_do_app/screens/login.dart';
 import '../constants/colors.dart';
 import '../widgets/todo_item.dart';
@@ -17,28 +16,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final todosList = Todo.todoList();
-  final todoController = TextEditingController();
-  List<Todo> foundToDo = [];
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  @override
-  void initState() {
-    foundToDo = todosList;
-    super.initState();
-  }
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<void> signOutFromGoogle() async {
-    final GoogleSignIn _googleSignIn = GoogleSignIn();
     try {
-      // Sign out from Firebase
       await _auth.signOut();
-
-      // Sign out from GoogleSign-In and disconnect
       await _googleSignIn.signOut();
       await _googleSignIn.disconnect();
-
-      // Now navigate to your login screen or handle the logout state
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
     } catch (e) {
       print('Error signing out: $e');
     }
@@ -55,12 +41,7 @@ class _HomeState extends State<Home> {
           showDialog(
             context: context,
             builder: (context) {
-              return Todoscreen(
-                onToDoAdded: (title, description) {
-                  addToDoItem(title, description);
-                  Navigator.of(context).pop();
-                },
-              );
+              return Todoscreen();
             },
           );
         },
@@ -74,43 +55,6 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-  }
-
-  void handleToDoChange(Todo todo) {
-    setState(() {
-      todo.isDone = !todo.isDone;
-    });
-  }
-
-  void deleteToDoItem(String id) {
-    setState(() {
-      todosList.removeWhere((item) => item.id == id);
-    });
-  }
-
-  void addToDoItem(String toDoText, String todoDescription) {
-    setState(() {
-      todosList.add(Todo(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          todoText: toDoText,
-          todoDescription: todoDescription));
-      todoController.clear();
-    });
-  }
-
-  void runFilter(String searchKeyword) {
-    List<Todo> results = [];
-    if (searchKeyword.isEmpty) {
-      results = todosList;
-    } else {
-      results = todosList
-          .where((item) =>
-          item.todoText!.toLowerCase().contains(searchKeyword.toLowerCase()))
-          .toList();
-    }
-    setState(() {
-      foundToDo = results;
-    });
   }
 
   AppBar buildAppBar() {
@@ -128,23 +72,14 @@ class _HomeState extends State<Home> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
-                // showDialog(
-                //     context: context,
-                //     builder: (context){
-                //       return const Center(
-                //         child: CircularProgressIndicator(),
-                //       );
-                //     }
-                // );
                 signOutFromGoogle();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>Login()));
               }
             },
             itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem<String>(
                   value: 'email',
-                  child: Text('${FirebaseAuth.instance.currentUser?.email??'Unknown'}'),
+                  child: Text('${FirebaseAuth.instance.currentUser?.email ?? 'Unknown'}'),
                 ),
                 PopupMenuItem<String>(
                   value: 'logout',
@@ -163,7 +98,7 @@ class _HomeState extends State<Home> {
               radius: 18,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(13)
+                borderRadius: BorderRadius.circular(13)
             ),
             color: Colors.white,
             elevation: 4,
@@ -186,7 +121,6 @@ class _HomeState extends State<Home> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: TextField(
-              onChanged: (value) => runFilter(value),
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.search,
@@ -200,28 +134,6 @@ class _HomeState extends State<Home> {
                 ),
                 border: InputBorder.none,
               ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 40, bottom: 20),
-                  child: Text(
-                    'All ToDos',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                for (Todo todoo in foundToDo.reversed)
-                  TodoItem(
-                    todo: todoo,
-                    onToDoChange: handleToDoChange,
-                    onDeleteItem: deleteToDoItem,
-                  ),
-              ],
             ),
           ),
         ],
