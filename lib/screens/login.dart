@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:to_do_app/screens/dashBoard.dart';
-import 'package:to_do_app/screens/home.dart';
 import 'package:to_do_app/screens/signUP.dart';
 
 class Login extends StatefulWidget {

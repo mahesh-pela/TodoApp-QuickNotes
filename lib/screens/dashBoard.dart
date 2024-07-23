@@ -1,9 +1,13 @@
+//this screen consists of the home page
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 import 'package:to_do_app/constants/colors.dart';
+import 'package:to_do_app/screens/TodoScreen.dart';
 import 'package:to_do_app/screens/login.dart';
 
 class Dashboard extends StatefulWidget {
@@ -27,8 +31,19 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  //Delete todo
+  Future<void> deleteToDo(String docId) async{
+    try{
+      await FirebaseFirestore.instance.collection("Users").doc(docId).delete();
+      print("Todo deleted successfully");
+    }catch(e){
+        print("Error deleting todo");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: tdBGColor,
       appBar: buildAppBar(),
@@ -44,104 +59,105 @@ class _DashboardState extends State<Dashboard> {
             ),
             SizedBox(height: 10),
             Expanded(
-              //fetching data form the firestore
               child: StreamBuilder(
-                //location where data is stored in the firestore
-                stream: FirebaseFirestore.instance.collection("Users").snapshots(),
-                builder: (context, snapshot){
-                  //checking whether the connection with firebase is succeded or not
-                  if(snapshot.connectionState == ConnectionState.active){
-                    // retrieving the data
-                    if(snapshot.hasData){
-                      return ListView.builder(itemBuilder: (context,index){
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 20),
-                          child: ListTile(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                            tileColor: Colors.white,
-                            leading: Icon(
-                              Icons.check_box_outline_blank,
-                              color: tdBlue,
-                            ),
-                            title: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${snapshot.data!.docs[index]["Title"]}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: tdBlack,
-                                        fontWeight: FontWeight.bold,
+                stream: FirebaseFirestore.instance
+                    .collection("Users")
+                    // .where('userID', isEqualTo: user!.uid)
+                    .orderBy('DateTime', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.active) {
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final doc = snapshot.data!.docs[index];
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 20),
+                            child: ListTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                              tileColor: Colors.white,
+                              leading: Icon(
+                                Icons.check_box_outline_blank,
+                                color: tdBlue,
+                              ),
+                              title: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        doc["Title"] ?? 'No Title',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: tdBlack,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      '${snapshot.data!.docs[index]["Description"]}',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: tdBlack,
+                                      SizedBox(height: 4),
+                                      Text(
+                                        doc["Description"] ?? 'No Description',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: tdBlack,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      '${snapshot.data!.docs[index]["DateTime"]}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
+                                      SizedBox(height: 4),
+                                      Text(
+                                        doc["DateTime"] ?? 'No Date',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
+                              trailing: PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  if (value == 'delete') {
+                                    deleteToDo(doc.id);
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) {
+                                  return [
+                                    PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+                                    PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+                                  ];
+                                },
+                              ),
                             ),
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'delete') {
-                                  // Handle delete action
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return [
-                                  PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-                                  PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
-                                ];
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                        itemCount: snapshot.data!.docs.length,
+                          );
+                        },
                       );
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      return Center(child: Text('No Data Found'));
                     }
-                    else if(snapshot.hasError){
-                      return Center(child: Text('${snapshot.hasError.toString()}'),);
-                    }
-                    else{
-                      return Center(child: Text('No Data Found'),);
-                    }
+                  } else {
+                    return Center(child: CircularProgressIndicator());
                   }
-                  else{
-                    return Center(child: CircularProgressIndicator(),);
-                  }
+                },
+              ),
+            )
 
-                }),
-            ),
+
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>Todoscreen()));
         },
         backgroundColor: Colors.orange,
         child: Icon(

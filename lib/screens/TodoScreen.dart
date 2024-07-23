@@ -1,12 +1,14 @@
+//this is screen for adding the todo
 
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Todoscreen extends StatefulWidget {
-  // final Function(String, String) onToDoAdded;
 
   const Todoscreen({Key? key}) : super(key: key);
 
@@ -21,13 +23,21 @@ class _TodoscreenState extends State<Todoscreen> {
   var currentDateTime = DateTime.now();
   OverlayEntry? _popupMenuOverlay;
 
+  String getFormattedDateTime(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
+    return formatter.format(dateTime);
+  }
+
   //adding data to the firebase
   void addData(String title, String description, String datetime) async{
+    // to get the current userId
+    final user = FirebaseAuth.instance.currentUser;
     if(title.isNotEmpty){
-      FirebaseFirestore.instance.collection("Users").doc(title).set({
+      FirebaseFirestore.instance.collection("Users").doc().set({
         "Title" : title,
         "Description" : description,
-        "DateTime" : datetime
+        "DateTime" : datetime,
+        "userID" : user!.uid,
       }).then((value){
           print('Data Inserted');
       });
@@ -39,7 +49,7 @@ class _TodoscreenState extends State<Todoscreen> {
       case 'save':
         String usrtitle = titleController.text.trim();
         String usrdescription = descriptionController.text.trim();
-        String formattedDateTime = '${currentDateTime.day}/${currentDateTime.month}/${currentDateTime.year} ${currentDateTime.hour}:${currentDateTime.minute}';
+        String formattedDateTime = getFormattedDateTime(currentDateTime);
 
         addData(usrtitle, usrdescription, formattedDateTime);
 

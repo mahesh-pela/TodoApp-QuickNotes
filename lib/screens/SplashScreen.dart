@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:to_do_app/screens/authWrapper.dart';
 import 'package:to_do_app/screens/login.dart';
 
 class Splashscreen extends StatefulWidget{
@@ -16,7 +17,7 @@ class _SplashscreenState extends State<Splashscreen>{
     super.initState();
 
     Timer(Duration(seconds: 2), (){
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AuthWrapper()));
     });
 
   }
