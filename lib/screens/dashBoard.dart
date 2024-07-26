@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_app/constants/colors.dart';
@@ -18,6 +19,8 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   //google signout
   Future<void> signOutFromGoogle() async {
@@ -68,10 +71,18 @@ class _DashboardState extends State<Dashboard> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.active) {
                     if (snapshot.hasData) {
+                      // code for search query
+                      //filter documents based on the search query
+                      final filteredDocs = snapshot.data!.docs.where((doc){
+                        final title = doc['Title']?.toLowerCase() ?? '';
+                        final description = doc['Description']?.toLowerCase() ?? '';
+                        return title.contains(_searchQuery) || description.contains(_searchQuery);
+                      }).toList();
+
                       return ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
+                        itemCount: filteredDocs.length,
                         itemBuilder: (context, index) {
-                          final doc = snapshot.data!.docs[index];
+                          final doc = filteredDocs[index];
                           return Container(
                             margin: EdgeInsets.only(bottom: 20),
                             child: ListTile(
@@ -239,6 +250,12 @@ class _DashboardState extends State<Dashboard> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: TextField(
+              controller: _searchController,
+              onChanged: (value){
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.search,

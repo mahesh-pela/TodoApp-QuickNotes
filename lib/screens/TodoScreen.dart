@@ -48,7 +48,6 @@ class _TodoscreenState extends State<Todoscreen> {
         currentDateTime = DateTime.parse(doc['DateTime']);
       });
     }
-
   }
 
   // add todo and create todo code
@@ -79,6 +78,7 @@ class _TodoscreenState extends State<Todoscreen> {
       }
     }
   }
+
   //code for edit section ends here
 
   String getFormattedDateTime(DateTime dateTime) {
