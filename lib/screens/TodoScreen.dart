@@ -9,8 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Todoscreen extends StatefulWidget {
+  // to fetch the details from the firestore of the specific id
+  final String? docId;
 
-  const Todoscreen({Key? key}) : super(key: key);
+  const Todoscreen({Key? key, required this.docId}) : super(key: key);
 
   @override
   State<Todoscreen> createState() => _TodoscreenState();
@@ -23,27 +25,66 @@ class _TodoscreenState extends State<Todoscreen> {
   var currentDateTime = DateTime.now();
   OverlayEntry? _popupMenuOverlay;
 
+  // code for edit section
+  // at first the screen will be on the create todo mode
+  bool isEditMode = false;
+
+  void initState(){
+    super.initState();
+    // if it is in edit mode it will contain the docId
+    if(widget.docId != null){
+      isEditMode = true;
+      fetchTodoDetails(widget.docId!);
+    }
+  }
+
+  //method to fetch data from the firestore
+  void fetchTodoDetails(String docId) async{
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection("Users").doc(docId).get();
+    if(doc.exists){
+      setState(() {
+        titleController.text = doc['Title'];
+        descriptionController.text = doc['Description'];
+        currentDateTime = DateTime.parse(doc['DateTime']);
+      });
+    }
+
+  }
+
+  // add todo and create todo code
+  void saveData(String title, String description, String datetime) async{
+    final user = FirebaseAuth.instance.currentUser;
+    if(title.isNotEmpty){
+      if(isEditMode && widget.docId != null){
+        //update existing todo
+        FirebaseFirestore.instance.collection("Users").doc(widget.docId).update({
+          'Title' : title,
+          'Description' : description,
+          'DateTime' : datetime,
+          'userID' : user!.uid,
+        }).then((value){
+          print('Data updated');
+        });
+      }
+      else{
+        //Add new todo
+        FirebaseFirestore.instance.collection('Users').doc().set({
+          'Title' : title,
+          'Description' : description,
+          'DateTime' : datetime,
+          'userID' : user!.uid
+        }).then((value){
+          print('Data inserted');
+        });
+      }
+    }
+  }
+  //code for edit section ends here
+
   String getFormattedDateTime(DateTime dateTime) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
     return formatter.format(dateTime);
   }
-
-  //adding data to the firebase
-  void addData(String title, String description, String datetime) async{
-    // to get the current userId
-    final user = FirebaseAuth.instance.currentUser;
-    if(title.isNotEmpty){
-      FirebaseFirestore.instance.collection("Users").doc().set({
-        "Title" : title,
-        "Description" : description,
-        "DateTime" : datetime,
-        "userID" : user!.uid,
-      }).then((value){
-          print('Data Inserted');
-      });
-    }
-  }
-
   void _onMenuItemSelected(String value) {
     switch (value) {
       case 'save':
@@ -51,7 +92,7 @@ class _TodoscreenState extends State<Todoscreen> {
         String usrdescription = descriptionController.text.trim();
         String formattedDateTime = getFormattedDateTime(currentDateTime);
 
-        addData(usrtitle, usrdescription, formattedDateTime);
+        saveData(usrtitle, usrdescription, formattedDateTime);
 
         Navigator.pop(context);
         break;
@@ -60,9 +101,6 @@ class _TodoscreenState extends State<Todoscreen> {
         break;
       case 'cancel':
         Navigator.pop(context); // Close Todoscreen
-        break;
-      case 'delete':
-      // Handle delete action
         break;
     }
     _popupMenuOverlay?.remove(); // Remove overlay after handling action
@@ -133,16 +171,6 @@ class _TodoscreenState extends State<Todoscreen> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           'Cancel',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _onMenuItemSelected('delete'),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Delete',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                         ),
                       ),

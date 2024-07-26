@@ -124,7 +124,12 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               trailing: PopupMenuButton<String>(
                                 onSelected: (value) {
-                                  if (value == 'delete') {
+                                  if(value == 'edit'){
+                                    Navigator.push(
+                                      context, MaterialPageRoute(builder: (context) =>Todoscreen(docId: doc.id)),
+                                    );
+                                  }
+                                  else if (value == 'delete') {
                                     deleteToDo(doc.id);
                                   }
                                 },
@@ -157,7 +162,7 @@ class _DashboardState extends State<Dashboard> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>Todoscreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>Todoscreen(docId: null)));
         },
         backgroundColor: Colors.orange,
         child: Icon(
