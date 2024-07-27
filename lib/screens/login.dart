@@ -45,20 +45,46 @@ class _LoginState extends State<Login> {
   }
 
   Future<UserCredential> signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    //show the circular progress indicator while signing in
+    showDialog(
+        context: context,
+        // barrierDismissible: false,
+        builder: (context){
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        });
 
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth = await googleUser
+          ?.authentication;
 
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Sign in with the credential
+       UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+       //close the progress dialog
+      Navigator.pop(context);
+
+      //return the userCredential
+      return userCredential;
+    }catch(e){
+      //close the progress dialog
+      Navigator.pop(context);
+
+      //Handle error
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error signing in with Google')));
+      throw e;
+    }
   }
 
 

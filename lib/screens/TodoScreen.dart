@@ -217,7 +217,7 @@ class _TodoscreenState extends State<Todoscreen> {
                 border: InputBorder.none,
               ),
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 24,
                 fontWeight: FontWeight.w900,
               ),
               minLines: 1,
@@ -236,10 +236,11 @@ class _TodoscreenState extends State<Todoscreen> {
             TextField(
               controller: descriptionController,
               decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   hintText: 'Start typing',
                   hintStyle: TextStyle(fontSize: 18, color: Colors.black26),
                   border: InputBorder.none),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w400),
               minLines: 1,
               maxLines: null,
             )

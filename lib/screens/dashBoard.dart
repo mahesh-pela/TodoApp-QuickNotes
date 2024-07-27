@@ -105,9 +105,9 @@ class _DashboardState extends State<Dashboard> {
                                       Text(
                                         doc["Title"] ?? 'No Title',
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 17,
                                           color: tdBlack,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w900
                                         ),
                                       ),
                                       SizedBox(height: 4),
@@ -116,7 +116,7 @@ class _DashboardState extends State<Dashboard> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           color: tdBlack,
                                         ),
@@ -192,12 +192,12 @@ class _DashboardState extends State<Dashboard> {
       backgroundColor: tdBGColor,
       automaticallyImplyLeading: false,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Icon(
-            Icons.menu,
-            color: tdGrey,
-          ),
+          // Icon(
+          //   Icons.menu,
+          //   color: tdGrey,
+          // ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
