@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:to_do_app/screens/dashBoard.dart';
+import 'package:to_do_app/screens/forgotPassword.dart';
 import 'package:to_do_app/screens/signUP.dart';
 
 class Login extends StatefulWidget {
@@ -191,13 +192,19 @@ class _LoginState extends State<Login> {
                 alignment: Alignment.centerRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 30),
-                  child: Text(
-                    'Forget Password?',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0000EE),
-                      decoration: TextDecoration.underline,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder:
+                          (context) => Forgotpassword()));
+                    },
+                    child: Text(
+                      'Forget Password?',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0000EE),
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
