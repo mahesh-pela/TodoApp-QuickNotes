@@ -12,58 +12,18 @@ class _ForgotPasswordState extends State<Forgotpassword> {
   final TextEditingController resetEmailController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  @override
+  void dispose(){
+    resetEmailController.dispose();
+    super.dispose();
+  }
+
   Future<void> resetPassword() async {
-    final email = resetEmailController.text.trim();
-    print('Resetting password for email: $email');
-
-    try {
-      // Check if the user exists
-      final signInMethods = await _auth.fetchSignInMethodsForEmail(email);
-      print('Sign-in methods for $email: $signInMethods');
-
-      if (signInMethods.isEmpty) {
-        print('No user found with this email.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("No user found with this email."),
-          ),
-        );
-        return; // Exit the method if no user is found
-      }
-
-      // If user exists, send the password reset email
-      await _auth.sendPasswordResetEmail(email: email);
-      print('Password reset email sent.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Password reset email sent"),
-        ),
-      );
-    } on FirebaseAuthException catch (e) {
-      print('FirebaseAuthException: ${e.code}');
-      String message;
-      switch (e.code) {
-        case 'invalid-email':
-          message = "The email address is not valid.";
-          break;
-        case 'user-not-found':
-          message = "No user found with this email.";
-          break;
-        default:
-          message = "An error occurred. Please try again.";
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $message"),
-        ),
-      );
-    } catch (e) {
-      print('Exception: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("An error occurred"),
-        ),
-      );
+    try{
+      await _auth.sendPasswordResetEmail(email: resetEmailController.text);
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>Sucessscreen()));
+    }on FirebaseAuthException catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message.toString())));
     }
   }
 
