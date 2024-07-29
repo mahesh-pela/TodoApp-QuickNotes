@@ -21,9 +21,10 @@ void main() async {
     //Enable firestore offline
     // it will save the data on the local device until the internet is not connected
     FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
-
     // authenticating user locally based on the data saved on the cache of the device
-    await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+    if(kIsWeb){
+      await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+    }
   } catch (e) {
     print('Error initializing Firebase: $e');
   }

@@ -14,34 +14,27 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  var uemail = TextEditingController();
-  var upass = TextEditingController();
+  var logEmail = TextEditingController();
+  var logPass = TextEditingController();
   var _obscureText = true;
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  // FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // sign in using email and password
-  void _signIn() async {
+  Future<void> signIn() async{
     try {
-      // Show the circular progress indicator while logging in
-      showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: logEmail.text,
+          password: logPass.text
       );
-
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: uemail.text,
-        password: upass.text,
-      );
-
-      Navigator.pop(context); // Close the progress dialog
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard()));
-    } catch (e) {
-      Navigator.pop(context); // Close the progress dialog
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login Error')));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> Dashboard()));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No user found for that email.')));
+      } else if (e.code == 'wrong-password') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Wrong password provided for that user.')));
+      }
+      else{
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login Error')));
+      }
     }
   }
 
@@ -130,7 +123,7 @@ class _LoginState extends State<Login> {
                 margin: EdgeInsets.only(top: 10),
                 padding: EdgeInsets.only(right: 30),
                 child: TextField(
-                  controller: uemail,
+                  controller: logEmail,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.email_rounded),
@@ -160,7 +153,7 @@ class _LoginState extends State<Login> {
                 ),
                 child: TextField(
                   obscureText: _obscureText,
-                  controller: upass,
+                  controller: logPass,
                   decoration: InputDecoration(
                     prefixIcon: Padding(
                       padding: const EdgeInsets.only(
@@ -214,8 +207,8 @@ class _LoginState extends State<Login> {
                 width: double.infinity,
                 padding: EdgeInsets.only(right: 30),
                 child: ElevatedButton(
-                  onPressed: () {
-                    _signIn();
+                  onPressed: () async{
+                    await signIn();
                   },
                   child: Text(
                     'Sign In',

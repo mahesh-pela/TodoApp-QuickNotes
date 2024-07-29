@@ -1,5 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:to_do_app/screens/dashBoard.dart';
@@ -13,9 +13,9 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  var uemail = TextEditingController();
-  var upass = TextEditingController();
-  var _obscureText = true;
+  final TextEditingController uemail = TextEditingController();
+  final TextEditingController upass = TextEditingController();
+  bool _obscureText = true;
 
   Future<UserCredential> signInWithGoogle() async {
     // Trigger the authentication flow
@@ -34,6 +34,33 @@ class _SignupState extends State<Signup> {
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
+  Future<void> signUpWithEmailAndPassword() async {
+    try {
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: uemail.text.trim(),
+        password: upass.text.trim(),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('The password provided is too weak.')));
+      } else if (e.code == 'email-already-in-use') {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('The account already exists for that email.')));
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeFirebase();
+  }
+
+  Future<void> initializeFirebase() async {
+    await Firebase.initializeApp();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,27 +77,26 @@ class _SignupState extends State<Signup> {
               ),
               RichText(
                 text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 32, fontWeight: FontWeight.w700, color: Colors.red
-                  ),
-                  children: <TextSpan>[
-                    TextSpan(text: 'Welcome '),
-                    TextSpan(text: 'to QuickNotes 👋', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: Colors.black))
-                  ]
+                    style: TextStyle(
+                        fontSize: 32, fontWeight: FontWeight.w700, color: Colors.red
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(text: 'Welcome '),
+                      TextSpan(text: 'to QuickNotes 👋', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: Colors.black))
+                    ]
                 ),
               ),
               RichText(
                 text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w500,color: Colors.black
-                  ),
-                  children: <TextSpan>[
-                    TextSpan(text: "Let's turn your "),
-                    TextSpan(text: 'Plans ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.red)),
-                    TextSpan(text: 'into '),
-                    TextSpan(text: 'Achivements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.red))
-
-                  ]
+                    style: TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w500,color: Colors.black
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(text: "Let's turn your "),
+                      TextSpan(text: 'Plans ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.red)),
+                      TextSpan(text: 'into '),
+                      TextSpan(text: 'Achivements', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.red))
+                    ]
                 ),
               ),
               SizedBox(
@@ -81,7 +107,6 @@ class _SignupState extends State<Signup> {
                 child: Text('Full Name',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-
               Container(
                 margin: EdgeInsets.only(top: 10),
                 padding: EdgeInsets.only(right: 30),
@@ -124,7 +149,6 @@ class _SignupState extends State<Signup> {
                   ),
                 ),
               ),
-
               SizedBox(
                 height: 20,
               ),
@@ -141,13 +165,13 @@ class _SignupState extends State<Signup> {
                   obscureText: _obscureText,
                   controller: upass,
                   decoration: InputDecoration(
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: ImageIcon(
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: ImageIcon(
                           AssetImage('assets/images/passlock.png'),
-                        size: 5,
+                          size: 5,
+                        ),
                       ),
-                    ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 15),
                       hintText: 'Enter your password',
                       suffixIcon: IconButton(
@@ -161,7 +185,6 @@ class _SignupState extends State<Signup> {
                       ),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20))),
-
                 ),
               ),
               SizedBox(
@@ -174,17 +197,10 @@ class _SignupState extends State<Signup> {
                 width: double.infinity,
                 padding: EdgeInsets.only(right: 30),
                 child: ElevatedButton(
-                  onPressed: () {
-                    //sign up logic
-                    final auth = FirebaseAuth.instance;
-                    auth.createUserWithEmailAndPassword(
-                        email: uemail.text,
-                        password: upass.text
-                    );
-                    Navigator.pushReplacement(
-                        context, MaterialPageRoute(builder: (context) => Login()));
+                  onPressed: () async {
+                    await signUpWithEmailAndPassword();
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Login()));
                   },
-
                   child: Text(
                     'Sign Up',
                     style: TextStyle(
@@ -209,7 +225,7 @@ class _SignupState extends State<Signup> {
                   InkWell(
                     onTap: (){
                       Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => Login())
+                          context, MaterialPageRoute(builder: (context) => Login())
                       );
                     },
                     child: Text(
@@ -273,4 +289,3 @@ class _SignupState extends State<Signup> {
     );
   }
 }
-
